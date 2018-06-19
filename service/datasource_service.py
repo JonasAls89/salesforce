@@ -12,7 +12,7 @@ env = environ.get
 
 API_VERSION = env('API_VERSION', '43.0')
 PORT = env('PORT', 5000)
-ADDITIONAL_SALESFORCE_TYPES = json.loads(env('SALESFORCE_TYPES', '{"Flight__c": []}'))
+ADDITIONAL_SALESFORCE_TYPES = json.loads(env('SALESFORCE_TYPES', '[]'))
 RESPONSE_MIME_TYPE = env('RESPONSE_MIME_TYPE', 'application/json');
 AUTH_SCHEMA = env('AUTH_SCHEMA', 'password')
 
@@ -30,10 +30,13 @@ def get_entities(datatype):
                                  env('SALESFORCE_USERNAME', ""),
                                  env('SALESFORCE_PASSWORD', ""),
                                  env('SALESFORCE_USER_TOKEN', ""))
+    else:
+        raise Exception("Authentication schema is not supported")
 
     sf = Salesforce(instance_url=token.get('instance_url'), session_id=token.get('access_token'),
                     version=API_VERSION)
     since = request.args.get('since')
+    print(since)
     entities = sorted(DAO.get_entities(since, datatype, sf),
                       key=lambda k: k["_updated"])
     return Response(json.dumps(entities), mimetype=RESPONSE_MIME_TYPE)
