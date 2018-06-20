@@ -39,7 +39,17 @@ class DataAccess:
         end = datetime.now(pytz.UTC)  # we need to use UTC as salesforce API requires this
 
         if since is None:
-            result = [x['Id'] for x in sf.query("SELECT Id FROM %s" % datatype)["records"]]
+            result = []
+            created_date_stmt = ""
+            while True:
+                query = "SELECT Id, CreatedDate FROM {} {} ORDER BY CreatedDate".format(datatype,
+                                                                                        created_date_stmt)
+                records = sf.query(query)["records"]
+                temp_result = [x['Id'] for x in records]
+                result.extend(temp_result)
+                created_date_stmt = "WHERE CreatedDate > {}".format(records[-1]['CreatedDate'])
+                if len(temp_result) < 2000:  # salesforce limit 2000 rows
+                    break
         else:
             start = iso8601.parse_date(since)
             if getattr(sf, datatype):
@@ -65,5 +75,4 @@ class DataAccess:
                         c[property] = to_transit_datetime(parse(value))
 
                 entities.append(c)
-
         return entities
