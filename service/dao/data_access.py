@@ -23,7 +23,8 @@ class DataAccess:
         since. This function will send Flask.abort(404) error if entity datatype is not in
         supported types list"""
         if datatype not in self._entities:
-            abort(404)
+            #abort(404)
+            self._entities[datatype] = []
         if not self._entities[datatype]:
             fields = getattr(sf, datatype).describe()["fields"]
             self._entities[datatype] = fields
@@ -47,7 +48,8 @@ class DataAccess:
                 records = sf.query(query)["records"]
                 temp_result = [x['Id'] for x in records]
                 result.extend(temp_result)
-                created_date_stmt = "WHERE CreatedDate > {}".format(records[-1]['CreatedDate'])
+                if records:
+                    created_date_stmt = "WHERE CreatedDate > {}".format(records[-1]['CreatedDate'])
                 if len(temp_result) < 2000:  # salesforce limit 2000 rows
                     break
         else:
