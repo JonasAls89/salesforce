@@ -7,6 +7,7 @@ from iso8601 import iso8601
 from werkzeug.exceptions import abort
 
 from utils.date_utils import to_transit_datetime
+import logging
 
 
 class DataAccess:
@@ -53,6 +54,12 @@ class DataAccess:
                     break
         else:
             start = iso8601.parse_date(since)
+            if start < (end - timedelta(days=30)):  # salesforce replicates only last 30 days
+                logging.warning(
+                    "Salesforce replicates only last 30 days but since is set to {}".format(start))
+                start = datetime.now(pytz.UTC) - timedelta(days=30)
+                logging.warning("Changed since to {}".format(start))
+
             if getattr(sf, datatype):
                 if end > (start + timedelta(seconds=60)):
                     result = getattr(sf, datatype).updated(start, end)["ids"]
