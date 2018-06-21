@@ -9,7 +9,6 @@ from werkzeug.exceptions import abort
 from utils.date_utils import to_transit_datetime
 import logging
 
-
 class DataAccess:
     def __init__(self, entities_dict=None):
         """creates object that support standard set of salesforce entities, supplementary entity
@@ -54,10 +53,12 @@ class DataAccess:
                     break
         else:
             start = iso8601.parse_date(since)
+            logging.info("Since datetime presented: %s", start)
+            logging.info("End -30 days delta: %s", (end - timedelta(days=30)))
             if start < (end - timedelta(days=30)):  # salesforce replicates only last 30 days
                 logging.warning(
                     "Salesforce replicates only last 30 days but since is set to {}".format(start))
-                start = datetime.now(pytz.UTC) - timedelta(days=30)
+                start = datetime.now(pytz.UTC) - timedelta(days=30) + timedelta(seconds=60)
                 logging.warning("Changed since to {}".format(start))
 
             if getattr(sf, datatype):
