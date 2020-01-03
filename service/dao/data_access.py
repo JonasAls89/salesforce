@@ -23,7 +23,10 @@ class DataAccess:
         since. This function will send Flask.abort(404) error if entity datatype is not in
         supported types list"""
         if datatype not in self._entities:
-            abort(404)
+            logging.warning("Couldn't find data type {} in available types", datatype)
+            logging.warning("You may want to add {} to SALESFORCE_TYPES environment variable", datatype)
+            #abort(404)
+            self._entities[datatype] = []
         if not self._entities[datatype]:
             fields = getattr(sf, datatype).describe()["fields"]
             self._entities[datatype] = fields

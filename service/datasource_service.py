@@ -33,7 +33,7 @@ def store_token_to_sesam(sesam_api, sesam_jwt, token):
                         headers=headers)
     logging.info("Store salesforce access token to Sesam performed with status code  {}".format(res.status_code))
     if res.status_code > 299:
-        logging.warning("Something went wrong while sending token to Sesam node: {}".format(r.text))
+        logging.warning("Something went wrong while sending token to Sesam node: {}".format(res.text))
 
 
 @app.route('/<datatype>', methods=['GET'])
